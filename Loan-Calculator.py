@@ -8,7 +8,7 @@ amortized = True
 
 # Formula: Loan Payment(p) = Amount(a) / Discount Factor(d)
 # Calculate monthly payment amount
-def amortized_calculated(total_loan_amount, interest_rate, number_of_payments, ):
+def amortized_calculated(total_loan_amount, interest_rate, number_of_payments):
     a = total_loan_amount
     n = number_of_payments
     if interest_rate > 1:
@@ -37,7 +37,11 @@ def amortized_calculated(total_loan_amount, interest_rate, number_of_payments, )
 
     d = ((1 + r) ** n) / (r * (1 + r) ** n)
     print("Discount:", d)
+    #monthly payments:
+    lp = a * ((r*(1+r)**n)/(((1+r)**n)-1))
+    print("monthly:",round(lp,2))
 
+    print("total",round((lp*n)))
     p = a / d
     print("payment:", p)
 
