@@ -1,77 +1,108 @@
-import tkinter as tk
 # pip install matplotlib
-import matplotlib.pyplot as plt
+import tkinter as tk
+import matplotlib
+import numpy as np
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+
+matplotlib.use('TkAgg')
+
+
+class Loan:
+    def __init__(self, interest, principle, payment_type, term):
+        self.loan_interest = interest/12/100
+        self.loan_principle = principle
+        self.months = term
+        if payment_type == "monthly":
+            self.months = term
+        #interest_rate = interest / 100
+        self.monthly_payments = principle * (
+                    (self.loan_interest * (1 + self.loan_interest) ** term) / (((1 + self.loan_interest) ** term) - 1))
+        self.loan_total = self.monthly_payments * term
+        amortized = True
+        self.print_attributes()
+
+    def print_attributes(self):
+        print("Loan")
+        print("Principle: ", self.loan_principle)
+        print("Interest: ", self.loan_interest)
+        print("Total: ", self.loan_total)
+        print("Monthly: ", self.monthly_payments)
+
+    def get_amount_paid(self):
+        m_payment = self.monthly_payments
+        m_principle = self.loan_principle
+        count_x = self.months
+        interest_paid = 0
+        count_y = 0
+        payments = []
+        while count_x > count_y:
+            payments.append(
+                {
+                    "#": count_y,
+                    "paid": round(m_payment, 2),
+                    "total_paid": round(m_payment*(count_y+1), 2),
+                    "interest": round((self.loan_interest * m_principle)+interest_paid,2),
+                    "toward_principle": round(m_payment-(self.loan_interest * m_principle), 2),
+                    "principle": round(m_principle-m_payment, 2)
+                }
+            )
+            interest_paid += (self.loan_interest * m_principle)
+            m_principle -= (m_payment - (m_principle * self.loan_interest))
+            if m_payment > m_principle:
+                m_payment = m_principle+(m_principle*self.loan_interest)
+            count_y += 1
+        for i in payments:
+            print(i)
+
 
 
 def plot_graph():
-    # x axis values
-    x = [1, 2, 3]
-    # corresponding y axis values
-    y = [2, 4, 1]
+    x = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+    v = np.array([16, 16.31925, 17.6394, 16.003, 17.2861, 17.3131, 19.1259, 18.9694, 22.0003, 22.81226])
+    p = np.array([1, 16.23697, 17.31653, 17.22094, 17.68631, 17.73641, 18.6368,
+                  19.32125, 19.31756, 21.20247, 22.41444, 22.11718, 22.12453])
 
-    # plotting the points
-    plt.plot(x, y)
+    fig = Figure(figsize=(5, 5))
+    a = fig.add_subplot(111)
+    # a.scatter(v, x, color='red')
+    a.plot(range(2 + max(x)), p, color='red')
+    # a.invert_yaxis()
 
-    # naming the x axis
-    plt.xlabel('Year')
-    # naming the y axis
-    plt.ylabel('Amount($)')
+    a.set_title("Loan Calculator", fontsize=16)
+    a.set_ylabel("Amount ($)", fontsize=14)
+    a.set_xlabel("Year", fontsize=14)
 
-    # giving a title to my graph
-    plt.title('Loan Calculator')
-
-    # function to show the plot
-    #plt.show()
-    return plt
+    return fig
 
 
-loan_interest = 5.99
-loan_principle = 15559.99
-months = 60
-# interest-only loans: payments go to interest for first few years before and nothing on principle
-# amortized loans: include both principle and interest paid over the term
-amortized = True
+def get_plot_points(obj):
+    # Get x values
+    points = obj.months / 12
+    x = []
+    while points > 0:
+        x.insert(0, points)
+        points -= 1
+    print(x)
 
-
-# Formula: Loan Payment(p) = Amount(a) / Discount Factor(d)
-# Calculate monthly payment amount
-def interest_only_calculated(total_loan_amount=loan_principle, interest_rate=loan_interest, number_of_payments=months):
-    a = total_loan_amount
-    n = number_of_payments
-    r = interest_rate
-    print("Interest Only:")
-    monthly_payments = a * (r / n)
-    print("Monthly:", monthly_payments)
-
-
-def amortized_calculated(total_loan_amount, interest_rate, number_of_payments):
-    a = total_loan_amount
-    n = number_of_payments
-    if interest_rate > 1:
-        r = interest_rate / 100
-        r /= 12
-    print("Amortized\n")
-    print("Loan:", a)
-    print("Payments:", n)
-    print("Interest:", interest_rate, "%")
-
-    # monthly payments:
-    monthly_payments = a * ((r * (1 + r) ** n) / (((1 + r) ** n) - 1))
-    print("monthly: $", round(monthly_payments, 2))
-
-    print("total interest: $", round(((monthly_payments * n) - a), 2))
-    print("total: $", round((monthly_payments * n)))
+    # Get y values
+    points = obj.loan_total
+    point = obj.loan_total / len(x)
+    y = []
+    count = len(x)
+    # while points > 0:
+    #   y.append(points-(point*))
+    print(y)
 
 
 if __name__ == '__main__':
     print("Loan Calculator\n")
-    amortized_calculated(loan_principle, loan_interest, months)
-
+    # amortized_calculated(loan_principle, loan_interest, months)
+    loan = Loan(interest=5.99, principle=15559.99, payment_type="monthly,", term=60)
     window = tk.Tk()
     window.title("Loan Calculator")
 
     plot = plot_graph()
-
 
     # labels
     label_loan_amount = tk.Label(text="Loan Amount($):", font="Helvetica 13 bold").grid(row=0, column=0)
@@ -80,22 +111,31 @@ if __name__ == '__main__':
 
     # entries
     entry_loan_amount = tk.Entry(bd=3)
-    entry_loan_amount.insert(index=tk.END, string=str(loan_principle))
+    entry_loan_amount.insert(index=tk.END, string=str(loan.loan_principle))
     entry_interest = tk.Entry(bd=3)
-    entry_interest.insert(index=tk.END, string=str(loan_interest))
+    entry_interest.insert(index=tk.END, string=str(loan.loan_interest))
     entry_num_payments = tk.Entry(bd=3)
-    entry_num_payments.insert(index=tk.END, string=str(months))
+    entry_num_payments.insert(index=tk.END, string=str(loan.months))
 
     entry_loan_amount.grid(row=0, column=1)
     entry_interest.grid(row=1, column=1)
     entry_num_payments.grid(row=2, column=1)
-    option_mnths_yrs = tk.Menu(window)
-    # option_mnths_yrs.add_command("one")
-    # option_mnths_yrs.grid(row=2,column=3)
 
     # Calculate button
     btn_calculate = tk.Button(text="Calculate",
-                              command=lambda: amortized_calculated(loan_principle, loan_interest, months),
-                              font="Helvetica 15 bold")
+                              font="Helvetica 15 bold",
+                              # command=lambda: amortized_calculated(loan.loan_principle,
+                              #                                     loan.loan_interest,
+                              #                                     loan.months)
+                              )
     btn_calculate.grid(columnspan=2, row=3, column=0, pady=20)
+
+    # place plot graph in tkinter window
+    plot_graph = plot_graph()
+    canvas = FigureCanvasTkAgg(plot_graph, master=window)
+    canvas.get_tk_widget().grid(columnspan=30, rowspan=30, row=0, column=3)
+    canvas.draw()
+
+    get_plot_points(loan)
+    loan.get_amount_paid()
     window.mainloop()
