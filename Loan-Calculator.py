@@ -83,7 +83,7 @@ class Loan:
         print("y_total_paid: ", y_total_paid)
         # print("y_interest_paid: ", y_interest_paid)
         # print("y_principle: ", y_principle)
-        plot_points = [x, y_total_paid]
+        plot_points = [x, y_total_paid, y_interest_paid, y_principle]
         print(plot_points)
         return plot_points
 
@@ -97,14 +97,18 @@ class Loan:
 
         x = np.array(plot_points[0])
         y = np.array(plot_points[1])
+        yy = np.array(plot_points[2])
+        yyy = np.array(plot_points[3])
         print("x: ", x)
         print("y: ", y)
 
         fig = Figure(figsize=(5, 5))
         a = fig.add_subplot(111)
-        a.scatter(x, y, color='red')
-        a.plot (x,y, color="blue")
-        # a.plot(range(2 + max(x)), y, color='red')
+        a.scatter(x, y, color="red")
+        a.plot(x, y, color="blue")
+        a.plot(x, yy, color="purple")
+        a.plot(x, yyy, color="green")
+        # a.plot(range(2 + max(x)), y, color="red")
         # a.invert_yaxis()
 
         a.set_title("Loan Calculator", fontsize=16)
