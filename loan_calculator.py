@@ -96,7 +96,7 @@ class Window:
 
         self.setup_gui()
         self.set_gui_default_values()
-        self.setup_graph()
+        self.graph = self.setup_graph()
 
     def setup_gui(self):
         # input labels
@@ -115,7 +115,7 @@ class Window:
                 input.grid(row=row, column=1, pady=5)
             self.data_input[label] = input
 
-        calculate_button = tk.Button(text="Calculate", font="Helvetica 15 bold", command= self.calculate_button)
+        calculate_button = tk.Button(text="Calculate", font="Helvetica 15 bold", command=self.calculate_button)
         calculate_button.grid(row=len(input_labels), column=0, columnspan=2, pady=20)
 
         # output labels
@@ -129,20 +129,19 @@ class Window:
             output.grid(row=row, column=1, pady=5)
             self.data_output[label] = output
 
-        view_button = tk.Button(text="View payment schedule", font="Helvetica 15 bold", command= self.view_payment_schedule_button)
+        view_button = tk.Button(text="View payment schedule", font="Helvetica 15 bold",
+                                command=self.view_payment_schedule_button)
         view_button.grid(row=len(output_labels) + len(input_labels) + 1, column=0, columnspan=2, pady=20)
 
     def set_gui_default_values(self):
         default_principle = self.loan.principle
         default_interest = self.loan.interest
         default_term = self.loan.term
-        print(self.data_input)
 
         self.data_input["Principle ($)"].insert(index=tk.END, string=str(default_principle))
         self.data_input["Interest (%)"].insert(index=tk.END, string=str(default_interest))
         self.data_input["Term Length"].insert(index=tk.END, string=str(default_term))
         self.menuVar.set(self.frequency_options[1])
-        print(self.data_output)
 
         default_interest_to_be_paid = round(self.loan.get_total_interest_to_be_paid(), 2)
         default_total_to_be_paid = round(self.loan.get_total_to_be_paid_on_loan(), 2)
@@ -152,8 +151,6 @@ class Window:
         self.data_output["Pay/Period"].config(text="$" + str(default_pay_per_period))
 
     def calculate_button(self):
-        print("calculate button")
-
         new_principle = self.data_input["Principle ($)"].get()
         new_interest = self.data_input["Interest (%)"].get()
         new_term = self.data_input["Term Length"].get()
@@ -162,13 +159,12 @@ class Window:
                          interest=float(new_interest),
                          term=int(new_term),
                          payment_frequency=new_frequency)
-        self.data_output["Total Interest"].config(text="$" + str(round(self.loan.get_total_interest_to_be_paid(),2)))
-        self.data_output["Total repaid"].config(text="$" + str(round(self.loan.get_total_to_be_paid_on_loan(),2)))
-        self.data_output["Pay/Period"].config(text="$" + str(round(self.loan.get_payments_per_period(),2)))
-        self.setup_graph()
+        self.data_output["Total Interest"].config(text="$" + str(round(self.loan.get_total_interest_to_be_paid(), 2)))
+        self.data_output["Total repaid"].config(text="$" + str(round(self.loan.get_total_to_be_paid_on_loan(), 2)))
+        self.data_output["Pay/Period"].config(text="$" + str(round(self.loan.get_payments_per_period(), 2)))
+        self.update_graph()
 
     def view_payment_schedule_button(self):
-        print("view payment schedule button")
         schedule_window = tk.Toplevel(self.window)
         payment_schedule = self.loan.get_payment_schedule()
 
@@ -178,10 +174,13 @@ class Window:
             label.grid(row=0, column=header.index(head))
 
         for payment in payment_schedule:
-            label_num = tk.Label(schedule_window, text=payment.get("#")+1).grid(row=payment.get("#")+1, column=0)
-            label_pay = tk.Label(schedule_window, text=payment.get("total_payment") + 1).grid(row=payment.get("total_payment") + 1, column=1)
-            label_interest = tk.Label(schedule_window, text=payment.get("amount_toward_interest") + 1).grid(row=payment.get("amount_toward_interest") + 1, column=2)
-            label_principle = tk.Label(schedule_window, text=payment.get("remaining_principle") + 1).grid(row=payment.get("remaining_principle") + 1, column=3)
+            label_num = tk.Label(schedule_window, text=payment.get("#") + 1).grid(row=payment.get("#") + 1, column=0)
+            label_pay = tk.Label(schedule_window, text=payment.get("total_payment") + 1).grid(
+                row=payment.get("total_payment") + 1, column=1)
+            label_interest = tk.Label(schedule_window, text=payment.get("amount_toward_interest") + 1).grid(
+                row=payment.get("amount_toward_interest") + 1, column=2)
+            label_principle = tk.Label(schedule_window, text=payment.get("remaining_principle") + 1).grid(
+                row=payment.get("remaining_principle") + 1, column=3)
 
     def setup_graph(self):
         x_period, y_principle_paid, y_interest_paid, y_remaining_balance = self.get_plot_points()
@@ -206,11 +205,11 @@ class Window:
         canvas = FigureCanvasTkAgg(figure, master=self.window)
         canvas.get_tk_widget().grid(columnspan=10, rowspan=10, row=0, column=2)
         canvas.draw()
+        return fig
 
     def get_plot_points(self):
         points = self.loan.term / 12
         x_period = list(range(1, (int(points) + 1)))
-        print("print", x_period)
 
         schedule = self.loan.get_payment_schedule()[11::12]
 
@@ -219,46 +218,17 @@ class Window:
         y_remaining_balance = []
 
         for s in schedule:
-            print(s)
             y_interest_paid.append(s.get("total_interest_paid"))
             y_principle_paid.append(s.get("total_paid"))
             y_remaining_balance.append(s.get("remaining_principle"))
 
         return x_period, y_principle_paid, y_interest_paid, y_remaining_balance
 
+    def update_graph(self):
+        self.graph.clear()
+        self.graph = self.setup_graph()
 
-loan = Loan()
-
-print("percent to float:", loan.get_interest_percent_to_float())
-print(loan.get_total_to_be_paid_on_loan())
-
-periods = ["monthly", "biweekly", "weekly", "daily"]
-
-for period in periods:
-    loan_test = Loan(payment_frequency=period)
-    print("\nperiod:", period)
-    print("interest_per_period:", loan_test.get_interest_per_period())
-    print("payment_per_period:", loan_test.get_payments_per_period())
-
-count = 0
-list1 = list(range(60))
-for li in list1:
-    count += 1
-
-print(list)
-print(count)
-
-print(loan.get_total_interest_to_be_paid())
-
-schedule = loan.get_payment_schedule()
-for sch in schedule:
-    print(sch)
-
-# loan_3 = Loan(principle=3788.02, term=24)
-# print(loan_3.get_payments_per_period())
-# print(loan_3.get_total_interest_to_be_paid())
 
 root = tk.Tk()
-# root.title = "Loan Calculator"
 start = Window(root)
 root.mainloop()
