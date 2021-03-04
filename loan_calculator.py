@@ -165,6 +165,7 @@ class Window:
         self.update_graph()
 
     def view_payment_schedule_button(self):
+        # TODO: fix payment schedule button
         schedule_window = tk.Toplevel(self.window)
         payment_schedule = self.loan.get_payment_schedule()
 
