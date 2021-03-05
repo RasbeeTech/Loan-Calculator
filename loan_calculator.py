@@ -8,7 +8,7 @@ matplotlib.use('TkAgg')
 
 
 class Loan:
-    def __init__(self, interest=5.99, principle=15559.99, term=60, payment_frequency="monthly"):
+    def __init__(self, interest=3.99, principle=80000.00, term=60, payment_frequency="monthly"):
         self.interest = interest
         self.principle = principle
         self.term = term
