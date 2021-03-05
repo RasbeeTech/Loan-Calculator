@@ -42,7 +42,7 @@
   ```
   3. Create function to calculate the amount to be paid per period
   		1. The following formula is used:
-  		![alt text](https://github.com/RasbeeTech/Loan-Calculator/blob/main/loan_payment_formula.jpeg)
+  ![alt text](https://github.com/RasbeeTech/Loan-Calculator/blob/main/loan_payment_formula.jpeg)
   		2.  Formula to code:
   ```python
   def get_payments_per_period(self):
