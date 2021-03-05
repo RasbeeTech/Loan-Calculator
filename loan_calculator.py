@@ -165,27 +165,28 @@ class Window:
         self.update_graph()
 
     def view_payment_schedule_button(self):
-        # TODO: fix payment schedule button
         schedule_window = tk.Toplevel(self.window)
         payment_schedule = self.loan.get_payment_schedule()
 
-        header = ["#", "payment", "interest", "principle"]
+        header = ["#", "Payment", "Interest", "Principle"]
         for head in header:
             label = tk.Label(schedule_window, text=head)
             label.grid(row=0, column=header.index(head))
 
+        data = ["#", "total_payment", "amount_toward_interest", "remaining_principle",]
         for payment in payment_schedule:
-            label_num = tk.Label(schedule_window, text=payment.get("#") + 1).grid(row=payment.get("#") + 1, column=0)
-            label_pay = tk.Label(schedule_window, text=payment.get("total_payment") + 1).grid(
-                row=payment.get("total_payment") + 1, column=1)
-            label_interest = tk.Label(schedule_window, text=payment.get("amount_toward_interest") + 1).grid(
-                row=payment.get("amount_toward_interest") + 1, column=2)
-            label_principle = tk.Label(schedule_window, text=payment.get("remaining_principle") + 1).grid(
-                row=payment.get("remaining_principle") + 1, column=3)
+            row = payment.get("#") + 1
+            for d in data:
+                column = data.index(d)
+                if d == "#":
+                    label = tk.Label(schedule_window, text=payment.get(d)+1)
+                else:
+                    label = tk.Label(schedule_window, text=str(round(payment.get(d) + 1, 2)))
+                label.grid(row=row, column=column)
 
     def setup_graph(self):
         x_period, y_principle_paid, y_interest_paid, y_remaining_balance = self.get_plot_points()
-        width = 0.3
+        width = 0.22
         x = np.array(x_period)
         y1 = np.array(y_principle_paid)
         y2 = np.array(y_interest_paid)
@@ -194,9 +195,9 @@ class Window:
         figure = Figure(figsize=(9, 5))
         fig = figure.add_subplot(111)
 
-        fig.bar(x, y1, width, label="Total paid", color="orange")
-        fig.bar(x + width, y2, width, label="Interest paid", color="blue")
-        fig.bar(x + width * 2, y3, width, label="Balance remaining", color="purple")
+        fig.bar(x - width, y1, width, label="Total paid", color="orange")
+        fig.bar(x, y2, width, label="Interest paid", color="blue")
+        fig.bar(x + width, y3, width, label="Balance remaining", color="purple")
 
         fig.set_title("Loan Calculator", fontsize=16)
         fig.set_ylabel("Amount ($)", fontsize=14)
