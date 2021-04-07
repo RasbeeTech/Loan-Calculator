@@ -1,6 +1,6 @@
 # Loan-Calculator
 
- App to calculate interest and principle amounts of a loan
+ App to calculate interest and principle amounts of a loan and display's the data in an easy to read graph format.
  
  Python version: 3.8.7
 
